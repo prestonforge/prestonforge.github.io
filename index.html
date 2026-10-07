@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Preston Gakuya — Engineering Portfolio</title>
     <style>
-      :root {
+      \:root {
         --ink: #10151c;
         --muted: #5b6472;
         --accent: #0b62d6;
@@ -91,7 +91,7 @@
         font-size: 0.9rem;
         margin-right: 18px;
       }
-      .links a:hover { text-decoration: underline; }
+      .links a\:hover { text-decoration: underline; }
 
       /* Image placeholders */
       .ph {
@@ -150,7 +150,7 @@
         <p class="lede">
           A-level Maths, Physics &amp; Economics student (Year 12, Loughborough College) and Arkwright Scholar.
           I build low-cost electronics that give machines the ability to report on themselves —
-          from race telemetry to motor-fault diagnostics.
+          race telemetry that stops drivers running blind.
         </p>
         <div class="chips">
           <span class="chip">Arkwright Engineering Scholar</span>
@@ -176,27 +176,14 @@
             <li><strong>O(1) moving-average filter:</strong> circular-buffer signal smoothing that tames severe motor EMI without stalling the microprocessor.</li>
             <li><strong>Software safety interlocks:</strong> a hysteresis state machine ("Limp Mode", 21.0V cutoff + 1.5V recovery dead-band) that protects cells and prevents relay chatter.</li>
             <li><strong>Isolated sensing architecture:</strong> 24V traction power stepped down via a 100k/10k divider; galvanically isolated current measurement with an ACS712 Hall-effect sensor.</li>
-            <li><strong>Validated before hardware:</strong> an Excel "digital twin" of the discharge curve set the 0.05V/min pacing target that the firmware enforces.</li>
+            <li><strong>Physics-backed pacing:</strong> the 0.05V/min pacing target comes from a first-order lead-acid discharge model (Peukert's Law + internal-resistance sag) — an interactive twin and an auditable Excel model ship with the repo.</li>
             <li><strong>Engineered enclosure:</strong> Fusion 360 design with brass threaded inserts and cable-routing slots for track vibration.</li>
           </ul>
           <div class="ph">[ Photo: ArduVCU breadboard / enclosure ]</div>
           <div class="links">
             <a href="https://github.com/prestonforge/ArduVCU">GitHub →</a>
+            <a href="https://prestonforge.github.io/digital-twin.html">Live digital twin →</a>
           </div>
-        </div>
-
-        <div class="card">
-          <h3>TinyML "Machine Doctor" <span class="tag">EPQ · in progress</span></h3>
-          <p class="sub">
-            On-device motor-fault classification from sound: an ESP32 and I2S microphone running
-            TensorFlow Lite inference at the edge — no cloud, no labels on the device.
-          </p>
-          <ul>
-            <li>Classifies healthy vs. faulty motors (DC, stepper, servo) from acoustic signatures.</li>
-            <li>Training pipeline in Edge Impulse; inference and feature extraction on the microcontroller.</li>
-          </ul>
-          <div class="ph">[ Photo: ESP32 + INMP441 rig ]</div>
-          <div class="links"><a href="https://github.com/prestonforge/tinyml-motor-doctor">GitHub →</a></div>
         </div>
 
         <div class="card">
@@ -218,64 +205,4 @@
         <div class="stats">
           <div class="stat"><div class="n">£55</div><div class="l">ArduVCU build cost — vs £100+ commercial</div></div>
           <div class="stat"><div class="n">78 hrs</div><div class="l">logged Gold CREST project time</div></div>
-          <div class="stat"><div class="n">~800</div><div class="l">weekly SumWorth users</div></div>
-          <div class="stat"><div class="n">90 min</div><div class="l">race distance the pacing model targets</div></div>
-        </div>
-      </section>
-
-      <section id="awards">
-        <h2>Awards &amp; recognition</h2>
-        <div class="card">
-          <ul>
-            <li><strong>Arkwright Engineering Scholarship</strong> — awarded 2026</li>
-            <li><strong>Gold CREST Award</strong> (British Science Association) — ArduVCU, April 2026</li>
-            <li><strong>Industrial Cadets Silver ×2</strong> — Leonardo (electronics/sensors) &amp; BAE Systems (systems/robotics)</li>
-            <li><strong>Young Scientists Journal</strong> — cover-featured article, "Engineering the Hypersonic Regime", Edition 20, pp. 20–21</li>
-          </ul>
-        </div>
-      </section>
-
-      <section id="placements">
-        <h2>Industry experience</h2>
-        <div class="timeline">
-          <div class="tl-item">
-            <div class="when">Oct–Dec 2026</div>
-            <div class="what">SPS Technologies — Forging Engineering Placement</div>
-            <div class="note">Two-week placement with the forging team (aerospace fasteners); observing self-directed improvement projects.</div>
-          </div>
-          <div class="tl-item">
-            <div class="when">Dec 2026</div>
-            <div class="what">Stantec — Electrical Engineering Programme</div>
-            <div class="note">Power distribution, automation, controls and building services (MEP), Birmingham office.</div>
-          </div>
-          <div class="tl-item">
-            <div class="when">2025–26</div>
-            <div class="what">Leonardo · BAE Systems — Industrial Cadets Silver</div>
-            <div class="note">Electronics/defence sensors and systems/robotics experience programmes.</div>
-          </div>
-          <div class="tl-item">
-            <div class="when">Summer 2027</div>
-            <div class="what">Nuffield Research Placement — applied</div>
-            <div class="note">Summer research placement application in progress.</div>
-          </div>
-        </div>
-      </section>
-
-      <section id="contact">
-        <h2>Contact</h2>
-        <div class="card">
-          <ul>
-            <li><strong>GitHub:</strong> <a href="https://github.com/prestonforge">github.com/prestonforge</a></li>
-            <li><strong>Email:</strong> your.email@example.com</li>
-            <li><strong>Location:</strong> Leicester, UK</li>
-          </ul>
-        </div>
-      </section>
-
-      <footer>
-        Last updated October 2026 · Site source on
-        <a href="https://github.com/prestonforge/prestonforge.github.io">GitHub</a>.
-      </footer>
-    </div>
-  </body>
-</html>
+          <div class="stat"><div class="n">~800</div>
