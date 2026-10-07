@@ -1,0 +1,250 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ArduVCU Digital Twin — lead-acid discharge &amp; pacing model</title>
+    <style>
+      :root {
+        --ink: #10151c; --muted: #5b6472; --accent: #0b62d6; --bg: #fafbfc;
+        --card: #ffffff; --line: #e3e8ee; --good: #0f8a3d; --bad: #d1372b;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--ink); background: var(--bg); line-height: 1.6; }
+      .wrap { max-width: 880px; margin: 0 auto; padding: 0 20px; }
+      header { background: linear-gradient(180deg, #0d1520 0%, #101d2e 100%); color: #f4f7fb; padding: 56px 0 40px; }
+      header .kicker { letter-spacing: 0.18em; text-transform: uppercase; font-size: 0.72rem; color: #7fb4f2; font-weight: 600; }
+      header h1 { font-size: clamp(1.6rem, 4.5vw, 2.4rem); margin: 10px 0 12px; letter-spacing: -0.02em; }
+      header p { color: #c6d4e4; max-width: 640px; font-size: 0.98rem; }
+      section { padding: 36px 0 4px; }
+      h2 { font-size: 1.1rem; margin-bottom: 18px; display: flex; align-items: center; gap: 12px; }
+      h2::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+      @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+      .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 22px 24px; }
+      .card h3 { font-size: 0.95rem; margin-bottom: 14px; }
+      .ctl { margin-bottom: 16px; }
+      .ctl label { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--muted); margin-bottom: 4px; }
+      .ctl label b { color: var(--ink); font-variant-numeric: tabular-nums; }
+      input[type="range"] { width: 100%; accent-color: var(--accent); }
+      .verdict { border-radius: 12px; padding: 14px 18px; font-weight: 700; font-size: 1.05rem; margin-bottom: 16px; }
+      .verdict.ok { background: #e9f7ef; color: var(--good); border: 1px solid #bfe6cd; }
+      .verdict.limp { background: #fdeeed; color: var(--bad); border: 1px solid #f5c8c3; }
+      .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .stat { border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+      .stat .n { font-weight: 700; color: var(--accent); font-variant-numeric: tabular-nums; font-size: 1.05rem; }
+      .stat .l { font-size: 0.74rem; color: var(--muted); }
+      .chart { width: 100%; height: auto; display: block; }
+      .note { font-size: 0.8rem; color: var(--muted); margin-top: 10px; }
+      .formula { font-family: "SF Mono", Consolas, Menlo, monospace; background: #f4f7fa; border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; font-size: 0.82rem; margin: 8px 0; overflow-x: auto; white-space: pre; }
+      footer { margin-top: 48px; border-top: 1px solid var(--line); padding: 24px 0 40px; color: var(--muted); font-size: 0.88rem; }
+      footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="wrap">
+        <div class="kicker">ArduVCU · Greenpower F24</div>
+        <h1>Digital Twin — lead-acid discharge &amp; pacing model</h1>
+        <p>
+          Every number on this page is computed live from the same physics the ArduVCU firmware uses:
+          Peukert's Law for runtime, internal-resistance sag for voltage, and the 0.05&nbsp;V/min
+          pacing budget with Limp&nbsp;Mode at 21.0&nbsp;V. Drag the sliders — nothing here is a
+          static picture. A real, auditable model, open-source with the
+          <a href="https://github.com/prestonforge/ArduVCU" style="color:#9cc4f5">ArduVCU repo</a>.
+        </p>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <section>
+        <div class="grid">
+          <div class="card">
+            <h3>Battery &amp; race (editable)</h3>
+            <div class="ctl">
+              <label>Average current draw I <b><span id="vI"></span> A</b></label>
+              <input id="sI" type="range" min="1" max="20" step="0.1" value="9.0" />
+            </div>
+            <div class="ctl">
+              <label>Capacity C (20h rate) <b><span id="vC"></span> Ah</b></label>
+              <input id="sC" type="range" min="5" max="30" step="0.5" value="20" />
+            </div>
+            <div class="ctl">
+              <label>Peukert exponent k <b><span id="vK"></span></b></label>
+              <input id="sK" type="range" min="1.00" max="1.40" step="0.01" value="1.15" />
+            </div>
+            <div class="ctl">
+              <label>Pack internal resistance R <b><span id="vR"></span> &Omega;</b></label>
+              <input id="sR" type="range" min="0.04" max="0.30" step="0.01" value="0.12" />
+            </div>
+            <p class="note">
+              Fixed by the car &amp; rules: 24&nbsp;V pack (2&times;12&nbsp;V SLA), race 90&nbsp;min,
+              Limp threshold 21.0&nbsp;V, pacing budget 0.05&nbsp;V/min, OCV 25.4&nbsp;V full / 22.0&nbsp;V empty.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>Race prediction</h3>
+            <div id="verdict" class="verdict ok"></div>
+            <div class="stats">
+              <div class="stat"><div class="n" id="oTrun"></div><div class="l">Peukert runtime t<sub>run</sub></div></div>
+              <div class="stat"><div class="n" id="oTlimp"></div><div class="l">time to Limp Mode (21.0 V)</div></div>
+              <div class="stat"><div class="n" id="oGrad"></div><div class="l">avg discharge gradient (budget: 0.050 V/min)</div></div>
+              <div class="stat"><div class="n" id="oV90"></div><div class="l">terminal V at race end (t = 90 min)</div></div>
+            </div>
+            <p class="note" id="oSus"></p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Discharge curve</h2>
+        <div class="card">
+          <svg id="chart" class="chart" viewBox="0 0 760 380" role="img" aria-label="Terminal voltage versus time"></svg>
+          <p class="note">
+            Solid line: predicted terminal voltage. Dashed: the 0.05&nbsp;V/min budget line — where the
+            pack would sit if draining at exactly the firmware's pacing target. Staying above the red
+            Limp line at 21.0&nbsp;V for the full 90 minutes is the race.
+          </p>
+        </div>
+      </section>
+
+      <section>
+        <h2>The model, fully disclosed</h2>
+        <div class="card">
+          <div class="formula">t_run = H · (C / (I · H))^k          // Peukert runtime (H = 20 h rating period)</div>
+          <div class="formula">V(t)  = V_empty + (V_full − V_empty) · SOC(t) − I · R    // SOC(t) = max(0, 1 − t / t_run)</div>
+          <div class="formula">t_limp = t_run · (1 − (V_limp − V_empty + I·R) / (V_full − V_empty))    // "never" if the empty flatline sits below the Limp line (I·R &lt; 1 V)</div>
+          <p class="note">
+            First-order model, deliberately simple and honest about it: linear open-circuit voltage vs SOC,
+            constant internal resistance, constant average current; no temperature, ageing or
+            surface-charge effects. Two modelled failure modes: Limp Mode (terminal voltage touches
+            21.0&nbsp;V while charge remains) and going flat (Peukert runtime runs out); when
+            I·R &lt; 1&nbsp;V the Limp line can never be reached and the binding limit is the
+            Peukert runtime. It's a pacing tool, not a cell datasheet — the interesting engineering
+            is in the trade-off it exposes: every extra amp of average draw costs superlinear minutes
+            (Peukert) <em>and</em> a deeper IR sag that pulls the Limp line closer.
+          </p>
+        </div>
+      </section>
+
+      <footer>
+        Part of <a href="https://github.com/prestonforge/ArduVCU">github.com/prestonforge/ArduVCU</a> —
+        the £55 open-source telemetry VCU (Gold CREST 2026). The same model ships as an auditable
+        Excel workbook with live formulas in the repo's <code>docs/</code> folder ·
+        Preston Gakuya, Leicester, UK.
+      </footer>
+    </div>
+
+    <script>
+      const H = 20, VF = 25.4, VE = 22.0, VL = 21.0, BU = 0.05, RACE = 90, TMAX = 120;
+
+      function simulate(I, C, k, R) {
+        const trun = H * Math.pow(C / (I * H), k) * 60;
+        const v0 = VF - I * R;
+        const sag = I * R;
+        const x = (VL - VE + sag) / (VF - VE);
+        const tlimp = x <= 0 ? Infinity : (x >= 1 ? 0 : trun * (1 - x));
+        const vEnd = VE - sag;
+        const vAt = (t) => VE + (VF - VE) * Math.max(0, 1 - t / trun) - sag;
+        const grad = (v0 - (isFinite(tlimp) ? VL : vEnd)) / (isFinite(tlimp) ? tlimp : trun);
+        const iSus = C / (H * Math.pow(RACE / 60 / H, 1 / k));
+        return { trun, v0, sag, tlimp, vEnd, vAt, grad, iSus };
+      }
+
+      function fmt(n, d) { return Number(n).toFixed(d); }
+
+      function render() {
+        const I = +document.getElementById("sI").value,
+              C = +document.getElementById("sC").value,
+              k = +document.getElementById("sK").value,
+              R = +document.getElementById("sR").value;
+        document.getElementById("vI").textContent = fmt(I, 1);
+        document.getElementById("vC").textContent = fmt(C, 1);
+        document.getElementById("vK").textContent = fmt(k, 2);
+        document.getElementById("vR").textContent = fmt(R, 2);
+
+        const m = simulate(I, C, k, R);
+        const limps = isFinite(m.tlimp) && m.tlimp < RACE;
+        const flat = !limps && m.trun < RACE;
+
+        const vd = document.getElementById("verdict");
+        vd.className = "verdict " + (limps || flat ? "limp" : "ok");
+        vd.textContent = limps
+          ? "LIMP at " + fmt(m.tlimp, 1) + " min — reduce average current to about " + fmt(m.iSus, 1) + " A"
+          : flat
+            ? "FLAT — pack empties at " + fmt(m.trun, 1) + " min, before the 90-min finish"
+            : "FINISHES — on pace, with " + fmt((isFinite(m.tlimp) ? m.tlimp : m.trun) - RACE, 1) + " min of margin" + (isFinite(m.tlimp) ? "" : " (the Limp line is never reached)");
+
+        document.getElementById("oTrun").textContent = fmt(m.trun, 1) + " min";
+        document.getElementById("oTlimp").textContent = isFinite(m.tlimp) ? fmt(m.tlimp, 1) + " min" : "never";
+        document.getElementById("oGrad").textContent = fmt(m.grad, 3) + " V/min";
+        document.getElementById("oV90").textContent = fmt(m.vAt(RACE), 2) + " V";
+        document.getElementById("oSus").textContent =
+          "Sustainable average current for a full 90-min race at these battery settings: " + fmt(m.iSus, 1) + " A (Peukert-limited).";
+
+        drawChart(m);
+      }
+
+      function drawChart(m) {
+        const W = 760, Hh = 380, L = 56, Rp = 16, T = 18, B = 40;
+        const pw = W - L - Rp, ph = Hh - T - B;
+        const yLo = Math.min(19.4, Math.min(m.vEnd, m.vAt(TMAX)) - 0.4);
+        const yHi = 26.0;
+        const X = (t) => L + (t / TMAX) * pw;
+        const Y = (v) => T + (1 - (v - yLo) / (yHi - yLo)) * ph;
+
+        let curve = "";
+        for (let t = 0; t <= TMAX; t += 0.5) {
+          curve += (t === 0 ? "M" : "L") + fmt(X(t), 1) + "," + fmt(Y(m.vAt(t)), 1);
+        }
+        const clip = (v) => Math.max(yLo, v);
+        let budget = "M" + fmt(X(0), 1) + "," + fmt(Y(m.v0), 1);
+        for (let t = 5; t <= TMAX; t += 5) {
+          budget += "L" + fmt(X(t), 1) + "," + fmt(Y(clip(m.v0 - BU * t)), 1);
+        }
+        if (m.v0 - BU * TMAX < yLo) budget += "L" + fmt(X(TMAX), 1) + "," + fmt(Hh - B, 1);
+
+        let ticksX = "", ticksY = "";
+        for (let t = 0; t <= TMAX; t += 15) {
+          ticksX += '<text x="' + fmt(X(t),1) + '" y="' + (Hh - 12) + '" text-anchor="middle" font-size="11" fill="#5b6472">' + t + "</text>" +
+                     '<line x1="' + fmt(X(t),1) + '" y1="' + (Hh - B) + '" x2="' + fmt(X(t),1) + '" y2="' + (Hh - B + 4) + '" stroke="#c3cdd8"/>';
+        }
+        for (let v = Math.ceil(yLo); v <= yHi; v += 1) {
+          ticksY += '<text x="' + (L - 8) + '" y="' + fmt(Y(v) + 4, 1) + '" text-anchor="end" font-size="11" fill="#5b6472">' + fmt(v, 1) + "</text>" +
+                     '<line x1="' + (L - 4) + '" y1="' + fmt(Y(v),1) + '" x2="' + L + '" y2="' + fmt(Y(v),1) + '" stroke="#c3cdd8"/>';
+        }
+
+        const limNearLeft = X(m.tlimp) < L + 90;
+        const limpMark = isFinite(m.tlimp) && m.tlimp <= TMAX
+          ? '<circle cx="' + fmt(X(m.tlimp),1) + '" cy="' + fmt(Y(VL),1) + '" r="5" fill="#d1372b"/>' +
+            '<text x="' + fmt(limNearLeft ? X(m.tlimp) + 8 : X(m.tlimp) - 8, 1) + '" y="' + fmt(Y(VL) - 12, 1) + '" text-anchor="' + (limNearLeft ? "start" : "end") + '" font-size="11" font-weight="700" fill="#d1372b">LIMP ' + fmt(m.tlimp, 1) + ' min</text>'
+          : "";
+
+        const empNearLeft = X(m.trun) < L + 90;
+        const emptyMark = m.trun <= TMAX
+          ? '<circle cx="' + fmt(X(m.trun),1) + '" cy="' + fmt(Y(m.vEnd),1) + '" r="4" fill="#5b6472"/>' +
+            '<text x="' + fmt(empNearLeft ? X(m.trun) + 8 : X(m.trun) - 8, 1) + '" y="' + fmt(Y(m.vEnd) - 10, 1) + '" text-anchor="' + (empNearLeft ? "start" : "end") + '" font-size="11" font-weight="700" fill="#5b6472">empty ' + fmt(m.trun, 1) + ' min</text>'
+          : "";
+
+        const axes = '<text x="' + (W - Rp) + '" y="' + (Hh - 2) + '" text-anchor="end" font-size="11" fill="#5b6472">t (min)</text>' +
+                     '<text x="10" y="' + (T + 14) + '" font-size="11" fill="#5b6472">V</text>';
+
+        document.getElementById("chart").innerHTML =
+          '<rect x="' + L + '" y="' + T + '" width="' + pw + '" height="' + ph + '" fill="#fdfdfe" stroke="#e3e8ee"/>' +
+          '<line x1="' + L + '" y1="' + fmt(Y(VL),1) + '" x2="' + (W - Rp) + '" y2="' + fmt(Y(VL),1) + '" stroke="#d1372b" stroke-width="1.5"/>' +
+          '<text x="' + (W - Rp - 4) + '" y="' + fmt(Y(VL) - 5, 1) + '" text-anchor="end" font-size="11" font-weight="700" fill="#d1372b">Limp 21.0 V</text>' +
+          '<line x1="' + fmt(X(RACE),1) + '" y1="' + T + '" x2="' + fmt(X(RACE),1) + '" y2="' + (Hh - B) + '" stroke="#0b62d6" stroke-dasharray="3,4" opacity="0.55"/>' +
+          '<text x="' + fmt(X(RACE) + 5, 1) + '" y="' + (T + 14) + '" font-size="11" font-weight="700" fill="#0b62d6">race end</text>' +
+          '<path d="' + budget + '" fill="none" stroke="#8895a5" stroke-width="1.5" stroke-dasharray="6,5"/>' +
+          '<path d="' + curve + '" fill="none" stroke="#0b62d6" stroke-width="2.5"/>' +
+          limpMark + emptyMark + ticksX + ticksY + axes;
+      }
+
+      ["sI", "sC", "sK", "sR"].forEach((id) => document.getElementById(id).addEventListener("input", render));
+      render();
+    </script>
+  <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" nonce="XH7hFtRr3QOfRlC7uZoJHg==" data-cf-beacon='{"version":"2024.11.0","token":"36b4216ae2dc4d5488c249161e71fe1e","spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>
