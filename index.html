@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Preston Gakuya — Engineering Portfolio</title>
+    <style>
+      :root {
+        --ink: #10151c;
+        --muted: #5b6472;
+        --accent: #0b62d6;
+        --bg: #fafbfc;
+        --card: #ffffff;
+        --line: #e3e8ee;
+        --chip: #eef4fc;
+        --chip-ink: #0b4fa8;
+      }
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: var(--bg);
+        line-height: 1.6;
+      }
+      .wrap { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+
+      /* Hero */
+      header {
+        background: linear-gradient(180deg, #0d1520 0%, #101d2e 100%);
+        color: #f4f7fb;
+        padding: 72px 0 56px;
+      }
+      header .kicker {
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        color: #7fb4f2;
+        font-weight: 600;
+      }
+      header h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 10px 0 14px; letter-spacing: -0.02em; }
+      header p.lede { color: #c6d4e4; max-width: 620px; font-size: 1.05rem; }
+      .chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 26px; }
+      .chip {
+        background: rgba(127, 180, 242, 0.12);
+        border: 1px solid rgba(127, 180, 242, 0.35);
+        color: #cfe3fb;
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 0.82rem;
+        font-weight: 500;
+      }
+
+      /* Sections */
+      section { padding: 52px 0 8px; }
+      h2 {
+        font-size: 1.15rem;
+        letter-spacing: 0.02em;
+        margin-bottom: 22px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      h2::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+      /* Project cards */
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 26px 28px;
+        margin-bottom: 20px;
+      }
+      .card h3 { font-size: 1.2rem; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+      .card h3 .tag {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--chip-ink);
+        background: var(--chip);
+        padding: 3px 10px;
+        border-radius: 999px;
+        letter-spacing: 0.04em;
+      }
+      .card p.sub { color: var(--muted); font-size: 0.92rem; margin: 6px 0 14px; }
+      .card ul { margin: 12px 0 4px; padding-left: 20px; color: #2b3442; font-size: 0.95rem; }
+      .card ul li { margin-bottom: 7px; }
+      .links { margin-top: 14px; }
+      .links a {
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-right: 18px;
+      }
+      .links a:hover { text-decoration: underline; }
+
+      /* Image placeholders */
+      .ph {
+        margin: 16px 0 4px;
+        border: 2px dashed #c3cdd8;
+        border-radius: 10px;
+        padding: 34px 16px;
+        text-align: center;
+        color: #8895a5;
+        font-size: 0.85rem;
+        background: #f4f7fa;
+      }
+
+      /* Stats row */
+      .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; }
+      .stat {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 18px 20px;
+      }
+      .stat .n { font-size: 1.45rem; font-weight: 700; color: var(--accent); }
+      .stat .l { font-size: 0.82rem; color: var(--muted); }
+
+      /* Timeline / placements */
+      .timeline { border-left: 2px solid var(--line); margin-left: 6px; padding-left: 22px; }
+      .tl-item { position: relative; padding-bottom: 22px; }
+      .tl-item::before {
+        content: "";
+        position: absolute;
+        left: -29px; top: 6px;
+        width: 12px; height: 12px;
+        border-radius: 50%;
+        background: var(--accent);
+        border: 3px solid var(--bg);
+      }
+      .tl-item .when { font-size: 0.78rem; font-weight: 700; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; }
+      .tl-item .what { font-weight: 600; }
+      .tl-item .note { color: var(--muted); font-size: 0.9rem; }
+
+      footer {
+        margin-top: 64px;
+        border-top: 1px solid var(--line);
+        padding: 28px 0 48px;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="wrap">
+        <div class="kicker">Engineering · Systems · Electronics</div>
+        <h1>Preston Gakuya</h1>
+        <p class="lede">
+          A-level Maths, Physics &amp; Economics student (Year 12, Loughborough College) and Arkwright Scholar.
+          I build low-cost electronics that give machines the ability to report on themselves —
+          from race telemetry to motor-fault diagnostics.
+        </p>
+        <div class="chips">
+          <span class="chip">Arkwright Engineering Scholar</span>
+          <span class="chip">Gold CREST Award · ArduVCU</span>
+          <span class="chip">Industrial Cadets Silver ×2</span>
+          <span class="chip">Head of Growth, SumWorth</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="wrap">
+      <section id="projects">
+        <h2>Projects</h2>
+
+        <div class="card">
+          <h3>ArduVCU — Greenpower racing telemetry &amp; battery management <span class="tag">Gold CREST · 78 hrs</span></h3>
+          <p class="sub">
+            A £55 open-source Vehicle Control Unit for Greenpower F24 electric racing — built because
+            commercial telemetry costs £100+ and junior teams drive blind.
+          </p>
+          <ul>
+            <li><strong>ESP32-based predictive telemetry:</strong> live battery-runtime estimation using Peukert's Law implemented from scratch in C++ — no libraries.</li>
+            <li><strong>O(1) moving-average filter:</strong> circular-buffer signal smoothing that tames severe motor EMI without stalling the microprocessor.</li>
+            <li><strong>Software safety interlocks:</strong> a hysteresis state machine ("Limp Mode", 21.0V cutoff + 1.5V recovery dead-band) that protects cells and prevents relay chatter.</li>
+            <li><strong>Isolated sensing architecture:</strong> 24V traction power stepped down via a 100k/10k divider; galvanically isolated current measurement with an ACS712 Hall-effect sensor.</li>
+            <li><strong>Validated before hardware:</strong> an Excel "digital twin" of the discharge curve set the 0.05V/min pacing target that the firmware enforces.</li>
+            <li><strong>Engineered enclosure:</strong> Fusion 360 design with brass threaded inserts and cable-routing slots for track vibration.</li>
+          </ul>
+          <div class="ph">[ Photo: ArduVCU breadboard / enclosure ]</div>
+          <div class="links">
+            <a href="https://github.com/prestonforge/ArduVCU">GitHub →</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>TinyML "Machine Doctor" <span class="tag">EPQ · in progress</span></h3>
+          <p class="sub">
+            On-device motor-fault classification from sound: an ESP32 and I2S microphone running
+            TensorFlow Lite inference at the edge — no cloud, no labels on the device.
+          </p>
+          <ul>
+            <li>Classifies healthy vs. faulty motors (DC, stepper, servo) from acoustic signatures.</li>
+            <li>Training pipeline in Edge Impulse; inference and feature extraction on the microcontroller.</li>
+          </ul>
+          <div class="ph">[ Photo: ESP32 + INMP441 rig ]</div>
+          <div class="links"><a href="https://github.com/prestonforge/tinyml-motor-doctor">GitHub →</a></div>
+        </div>
+
+        <div class="card">
+          <h3>SumWorth — Head of Growth <span class="tag">Startup role</span></h3>
+          <p class="sub">
+            Growth lead at a student-built startup giving students free, evidence-cited portfolio
+            research tools — backtesting, quantitative models and Monte Carlo simulation.
+          </p>
+          <ul>
+            <li>~800 weekly users grown with zero paid marketing.</li>
+            <li>Shipping user-requested product features alongside growth — the build half of the role.</li>
+          </ul>
+          <div class="links"><a href="https://sumworth.app">sumworth.app →</a></div>
+        </div>
+      </section>
+
+      <section id="numbers">
+        <h2>By the numbers</h2>
+        <div class="stats">
+          <div class="stat"><div class="n">£55</div><div class="l">ArduVCU build cost — vs £100+ commercial</div></div>
+          <div class="stat"><div class="n">78 hrs</div><div class="l">logged Gold CREST project time</div></div>
+          <div class="stat"><div class="n">~800</div><div class="l">weekly SumWorth users</div></div>
+          <div class="stat"><div class="n">90 min</div><div class="l">race distance the pacing model targets</div></div>
+        </div>
+      </section>
+
+      <section id="awards">
+        <h2>Awards &amp; recognition</h2>
+        <div class="card">
+          <ul>
+            <li><strong>Arkwright Engineering Scholarship</strong> — awarded 2026</li>
+            <li><strong>Gold CREST Award</strong> (British Science Association) — ArduVCU, April 2026</li>
+            <li><strong>Industrial Cadets Silver ×2</strong> — Leonardo (electronics/sensors) &amp; BAE Systems (systems/robotics)</li>
+            <li><strong>Young Scientists Journal</strong> — cover-featured article, "Engineering the Hypersonic Regime", Edition 20, pp. 20–21</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="placements">
+        <h2>Industry experience</h2>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="when">Oct–Dec 2026</div>
+            <div class="what">SPS Technologies — Forging Engineering Placement</div>
+            <div class="note">Two-week placement with the forging team (aerospace fasteners); observing self-directed improvement projects.</div>
+          </div>
+          <div class="tl-item">
+            <div class="when">Dec 2026</div>
+            <div class="what">Stantec — Electrical Engineering Programme</div>
+            <div class="note">Power distribution, automation, controls and building services (MEP), Birmingham office.</div>
+          </div>
+          <div class="tl-item">
+            <div class="when">2025–26</div>
+            <div class="what">Leonardo · BAE Systems — Industrial Cadets Silver</div>
+            <div class="note">Electronics/defence sensors and systems/robotics experience programmes.</div>
+          </div>
+          <div class="tl-item">
+            <div class="when">Summer 2027</div>
+            <div class="what">Nuffield Research Placement — applied</div>
+            <div class="note">Summer research placement application in progress.</div>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact">
+        <h2>Contact</h2>
+        <div class="card">
+          <ul>
+            <li><strong>GitHub:</strong> <a href="https://github.com/prestonforge">github.com/prestonforge</a></li>
+            <li><strong>Email:</strong> your.email@example.com</li>
+            <li><strong>Location:</strong> Leicester, UK</li>
+          </ul>
+        </div>
+      </section>
+
+      <footer>
+        Last updated October 2026 · Site source on
+        <a href="https://github.com/prestonforge/prestonforge.github.io">GitHub</a>.
+      </footer>
+    </div>
+  </body>
+</html>
